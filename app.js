@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb+srv://orif_milod:' + process.env.MONGO_ATLAT_PASSWORD + '@node-restful-api-boosq.mongodb.net/test?retryWrites=true', {useNewUrlParser: true});
 
 const productRoutes = require('./api/routes/product');
 const orderRoutes = require('./api/routes/orders');
