@@ -1,28 +1,56 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/products');
+const Product = require('../models/product');
 const mongoose = require('mongoose');
 
 //GET
 router.get('/', (req, res, next) => {
     Product
     .find()
-    .then(docs => res.status(200).json(docs))
+    .select('name price id') // or you can use select('-__v') to just exclude __v
+    .then(products => {
+        const response = {
+            count: products.length,
+            products: products.map(product => {
+                return {
+                    name: product.name,
+                    price: product.price,
+                    id: product.id,
+                    request: {
+                        type: 'GET',
+                        url: 'http:localhost:3000/products/' + product._id
+                    }
+                }
+            })
+        }
+        res.status(200).json(response)
+    })
     .catch(err => res.status(500).json({ error: err }) );   
 });
 
 //POST
 router.post('/', (req, res, next) => {
     const product = new Product({
-        _id: mongoose.Types.ObjectId(),
+        id: mongoose.Types.ObjectId(),
         name: req.body.name,
         price: req.body.price
     });
 
     //Saving product to Database
-    product.save((err, _product) => {
+    product.save((err, product) => {
         if (err) res.status(500).json({ error: err });
-        else res.status(201).json(_product);
+        else res.status(201).json({ 
+            message: 'Created product successfully',
+            product: {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                request: {
+                    type: 'GET',
+                    url: 'http:localhost:3000/products/' + product._id
+                }
+            }
+        });
     });
 });
 
@@ -34,8 +62,12 @@ router.get('/:productID', (req, res, next) => {
     //Fetching Data from Database
     Product
     .findById(id)
-    .then(_product => {
-        if(_product) res.status(200).json(_product);
+    .then(product => {
+        if(product) res.status(200).json({ 
+            id:  product.id,
+            name: product.name,
+            price: product.price
+        });
         else res.status(404).json({ message: "No data was found for this ID" });
     })
     .catch(err => res.status(500).json({ error: err }));
@@ -51,7 +83,7 @@ router.patch('/:productID', (req, res, next) => {
     }
 
     Product
-    .update({ _id: id}, {$set: updateOperations})
+    .update({ id: id }, {$set: updateOperations})
     .then( result => res.status(200).json(result) )
     .catch( err => res.status(500).json({ error: err }) );
 });
@@ -61,7 +93,7 @@ router.delete('/:productID', (req, res, next) => {
     const id = req.params.productID;
 
     Product
-    .remove({ _id: id })
+    .remove({ id: id })
     .then(result => res.status(200).json(result))
     .catch(err => res.status(500).json({ error: err }))
 });

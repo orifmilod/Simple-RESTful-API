@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 mongoose.connect('mongodb+srv://orif_milod:' + process.env.MONGO_ATLAT_PASSWORD + '@node-restful-api-boosq.mongodb.net/test?retryWrites=true', {useNewUrlParser: true});
+mongoose.Promise = global.Promise;
 
 const productRoutes = require('./api/routes/product');
 const orderRoutes = require('./api/routes/orders');
