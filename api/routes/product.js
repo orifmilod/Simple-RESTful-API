@@ -2,20 +2,45 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/product');
 const mongoose = require('mongoose');
+const multer = require('multer');
 
-//GET
+
+const storage = multer.diskStorage({
+    destination: (req, file, callback) => {
+        callback(null, './uploads/')
+    },
+    filename: (req, file, callback) =>  {
+        callback(null, Date.now(x) + file.originalname)
+    }
+});
+
+const fileFilter = (req, file, callback) => {
+    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png')
+        callback(null, true);
+    else  
+        callback(null, false);
+}
+const upload = multer({ 
+    storage: storage, 
+    limits: { fileSize: 1024 * 1024 * 5 },
+    fileFilter: fileFilter
+});
+
+
+//GET 
 router.get('/', (req, res, next) => {
     Product
     .find()
-    .select('name price id') // or you can use select('-__v') to just exclude __v
-    .then(products => {
+    .select('-__v') 
+    .then(products =>  {
         const response = {
             count: products.length,
             products: products.map(product => {
                 return {
                     name: product.name,
                     price: product.price,
-                    id: product.id,
+                    image: product.image,
+                    _id: product._id,
                     request: {
                         type: 'GET',
                         url: 'http:localhost:3000/products/' + product._id
@@ -29,11 +54,13 @@ router.get('/', (req, res, next) => {
 });
 
 //POST
-router.post('/', (req, res, next) => {
+router.post('/', upload.single('productImage'), (req, res, next) => {
+    console.log(req.file);
     const product = new Product({
-        id: mongoose.Types.ObjectId(),
+        _id: mongoose.Types.ObjectId(),
         name: req.body.name,
-        price: req.body.price
+        price: req.body.price,
+        productImage: req.file.path
     });
 
     //Saving product to Database
@@ -42,9 +69,10 @@ router.post('/', (req, res, next) => {
         else res.status(201).json({ 
             message: 'Created product successfully',
             product: {
-                id: product.id,
+                _id: product._id,
                 name: product.name,
                 price: product.price,
+                productImage: product.productImage,
                 request: {
                     type: 'GET',
                     url: 'http:localhost:3000/products/' + product._id
@@ -55,7 +83,7 @@ router.post('/', (req, res, next) => {
 });
 
 
-//GET
+//GET 
 router.get('/:productID', (req, res, next) => {
     const id = req.params.productID;
 
@@ -64,9 +92,10 @@ router.get('/:productID', (req, res, next) => {
     .findById(id)
     .then(product => {
         if(product) res.status(200).json({ 
-            id:  product.id,
+            _id:  product._id,
             name: product.name,
-            price: product.price
+            price: product.price,
+            productImage: product.image
         });
         else res.status(404).json({ message: "No data was found for this ID" });
     })
@@ -83,17 +112,15 @@ router.patch('/:productID', (req, res, next) => {
     }
 
     Product
-    .update({ id: id }, {$set: updateOperations})
+    .update({ _id: id }, {$set: updateOperations})
     .then( result => res.status(200).json(result) )
     .catch( err => res.status(500).json({ error: err }) );
 });
 
 //product ID DELETE
 router.delete('/:productID', (req, res, next) => {
-    const id = req.params.productID;
-
     Product
-    .remove({ id: id })
+    .remove({ _id: req.params.productID })
     .then(result => res.status(200).json(result))
     .catch(err => res.status(500).json({ error: err }))
 });

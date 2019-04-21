@@ -11,11 +11,12 @@ const productRoutes = require('./api/routes/product');
 const orderRoutes = require('./api/routes/orders');
 
 app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use('/uploads', express.static('uploads'));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 //To prevent CORS errors
-app.use((req, res, next) =>{
+app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', '*');
 
