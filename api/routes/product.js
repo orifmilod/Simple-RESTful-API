@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
         callback(null, './uploads/')
     },
     filename: (req, file, callback) =>  {
-        callback(null, Date.now(x) + file.originalname)
+        callback(null, Date.now() + file.originalname)
     }
 });
 
@@ -54,13 +54,13 @@ router.get('/', (req, res, next) => {
 });
 
 //POST
-router.post('/', upload.single('productImage'), (req, res, next) => {
+router.post('/', upload.single('image'), (req, res, next) => {
     console.log(req.file);
     const product = new Product({
         _id: mongoose.Types.ObjectId(),
         name: req.body.name,
         price: req.body.price,
-        productImage: req.file.path
+        image: req.file.path
     });
 
     //Saving product to Database
@@ -72,7 +72,7 @@ router.post('/', upload.single('productImage'), (req, res, next) => {
                 _id: product._id,
                 name: product.name,
                 price: product.price,
-                productImage: product.productImage,
+                image: product.image,
                 request: {
                     type: 'GET',
                     url: 'http:localhost:3000/products/' + product._id
@@ -95,7 +95,7 @@ router.get('/:productID', (req, res, next) => {
             _id:  product._id,
             name: product.name,
             price: product.price,
-            productImage: product.image
+            image: product.image
         });
         else res.status(404).json({ message: "No data was found for this ID" });
     })
