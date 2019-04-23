@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Order = require('../models/order');
+const checkAuth = require('../middleware/checkAuth');
 
-router.get('/', (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
     Order
     .find()
     .select('-__v')
@@ -14,7 +15,7 @@ router.get('/', (req, res, next) => {
     .catch(error => res.status(500).json(error))
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
     const order = new Order({
         _id: mongoose.Types.ObjectId(),
         quantity: req.body.quantity,
@@ -27,7 +28,7 @@ router.post('/', (req, res, next) => {
     .catch(error => res.status(500).json({ error: error }))
 });
 
-router.get('/:orderID', (req, res, next) => {
+router.get('/:orderID', checkAuth,(req, res, next) => {
     Order
     .findById(req.params.orderID)
     .then(result => res.status(200).json(result))
@@ -35,7 +36,7 @@ router.get('/:orderID', (req, res, next) => {
 });
 
 
-router.delete('/:orderID', (req, res, next) => {
+router.delete('/:orderID', checkAuth, (req, res, next) => {
     Order
     .remove({ _id: req.params.orderID })
     .then(result => res.status(200))
