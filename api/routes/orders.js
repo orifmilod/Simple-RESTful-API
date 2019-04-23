@@ -1,50 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
-const Order = require('../models/order');
 const checkAuth = require('../middleware/checkAuth');
-
-router.get('/', checkAuth, (req, res, next) => {
-    Order
-    .find()
-    .select('-__v')
-    .then(result => res.status(200).json({ 
-        count: result.length,
-        orders: result
-    }))
-    .catch(error => res.status(500).json(error))
-});
-
-router.post('/', checkAuth, (req, res, next) => {
-    const order = new Order({
-        _id: mongoose.Types.ObjectId(),
-        quantity: req.body.quantity,
-        product: req.body.productID,
-    });
-
-    order
-    .save()
-    .then(result => res.status(201).json(result))
-    .catch(error => res.status(500).json({ error: error }))
-});
-
-router.get('/:orderID', checkAuth,(req, res, next) => {
-    Order
-    .findById(req.params.orderID)
-    .then(result => res.status(200).json(result))
-    .catch(error => res.status(500).json(error))
-});
+const ordersController = require('../controller/order.js');
 
 
-router.delete('/:orderID', checkAuth, (req, res, next) => {
-    Order
-    .remove({ _id: req.params.orderID })
-    .then(result => res.status(200))
-    res.status(200).json({
-        message: 'Order deleted',
-        orderID: req.params.orderID
-    });
-});
-
+//Handling incoming requests to /orders
+router.get('/', checkAuth, ordersController.GET_ALL_ORDERS);
+router.post('/', checkAuth, ordersController.CREATE_ORDER);
+router.get('/:orderID', checkAuth, ordersController.GET_ORDER);
+router.delete('/:orderID', checkAuth, ordersController.DELETE_ORDER);
 
 module.exports = router;
