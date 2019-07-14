@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 mongoose.connect('mongodb+srv://orif_milod:' + process.env.MONGO_ATLAT_PASSWORD + '@node-restful-api-boosq.mongodb.net/test?retryWrites=true', {useNewUrlParser: true});
-mongoose.Promise = global.Promise;
+// mongoose.Promise = global.Promise;
 
 const productRoutes = require('./api/routes/product');
 const orderRoutes = require('./api/routes/orders');
@@ -20,7 +20,8 @@ app.use(bodyParser.json());
 //To prevent CORS errors
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Allow-Headers', 
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
     if(req.method === 'OPTIONS') {
         res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET')

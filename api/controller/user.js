@@ -31,6 +31,7 @@ exports.SIGN_UP = (req, res, next) => {
 }
 
 exports.SIGN_IN = (req, res, next) => {
+
     User
     .find({ email: req.body.email }, (err, user) => {
         if(err) res.status(401).json({ error: err })

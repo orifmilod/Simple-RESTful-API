@@ -6,6 +6,6 @@ const userController = require('../controller/user.js');
 //Handling incoming requests
 router.post('/signup', userController.SIGN_UP);
 router.post('/signin', userController.SIGN_IN);
-router.delete('/:userID', checkAuth, userController.DELETE_USER);
+router.patch('/:userID', userController.UPDATE_USER);// checkAuth,
 
 module.exports = router;
